@@ -1,4 +1,4 @@
-# bun-add-bcrypt-cookie-parser-cors-dotenv-express-http-status-codes-jsonwebtoken-mongoose-zod
+# Nest Hunt
 
 To install dependencies:
 
