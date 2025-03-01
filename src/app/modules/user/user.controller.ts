@@ -30,7 +30,34 @@ const getMe = catchAsync(async (req, res) => {
   });
 });
 
+// get all users controller
+const getAllUsers = catchAsync(async (req, res) => {
+  const { data, meta } = await UserService.getAllUsersFromDB(req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Users are retrieved successfully",
+    data,
+    meta,
+  });
+});
+
 // change status
+const updateUserStatus = catchAsync(async (req, res) => {
+  const userId = req.params.userId;
+
+  const result = await UserService.updateUserStatusIntoDB(userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Status is updated successfully",
+    data: result,
+  });
+});
+
+// update user controller
 const updateUser = catchAsync(async (req, res) => {
   const userId = req.params.userId;
 
@@ -44,16 +71,17 @@ const updateUser = catchAsync(async (req, res) => {
   });
 });
 
-// get all users controller
-const getAllUsers = catchAsync(async (req, res) => {
-  const { data, meta } = await UserService.getAllUsersFromDB(req.query);
+// update user role controller
+const updateUserRole = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  const { role } = req.body;
+  const result = await UserService.updateUserRoleIntoDB(userId, role);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Users are retrieved successfully",
-    data,
-    meta,
+    message: "User role is updated successfully!",
+    data: result,
   });
 });
 
@@ -73,7 +101,9 @@ const deleteUser = catchAsync(async (req, res) => {
 export const UserController = {
   createUser,
   getMe,
-  updateUser,
+  updateUserStatus,
   getAllUsers,
   deleteUser,
+  updateUser,
+  updateUserRole,
 };

@@ -30,14 +30,6 @@ const getMeFromDB = async (email: string) => {
   return result;
 };
 
-// update user into db
-const updateUserIntoDB = async (userId: string, payload: Partial<TUser>) => {
-  const result = await UserModel.findOneAndUpdate({ userId }, payload, {
-    new: true,
-  });
-  return result;
-};
-
 // get all users
 const getAllUsersFromDB = async (query: Record<string, unknown>) => {
   const userQuery = new QueryBuilder(UserModel.find(), query)
@@ -52,6 +44,42 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
     meta,
     data,
   };
+};
+
+// update user into db
+const updateUserStatusIntoDB = async (userId: string) => {
+  const result = await UserModel.findOneAndUpdate(
+    { userId },
+    { isActive: false },
+    {
+      new: true,
+    },
+  );
+  return result;
+};
+
+// update user into db
+const updateUserIntoDB = async (userId: string, payload: Partial<TUser>) => {
+  const result = await UserModel.findOneAndUpdate({ userId }, payload, {
+    new: true,
+  });
+  return result;
+};
+
+// update user role into db
+const updateUserRoleIntoDB = async (userId: string, role: string) => {
+  const result = await UserModel.findOneAndUpdate(
+    {
+      userId,
+    },
+    {
+      role,
+    },
+    {
+      new: true,
+    },
+  );
+  return result;
 };
 
 // delete user from db
@@ -74,4 +102,6 @@ export const UserService = {
   updateUserIntoDB,
   getMeFromDB,
   createUserIntoDB,
+  updateUserStatusIntoDB,
+  updateUserRoleIntoDB,
 };

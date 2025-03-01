@@ -16,16 +16,18 @@ const loginUser = async (payload: TLoginUser) => {
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
   }
+
+  // checking if the user is active
+  if (!user.isActive) {
+    throw new AppError(httpStatus.FORBIDDEN, "Your account is deactivated !");
+  }
+
   // checking if the user is already deleted
-
-  const isDeleted = user?.isDeleted;
-
-  if (isDeleted) {
+  if (user?.isDeleted) {
     throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
   }
 
   //checking if the password is correct
-
   if (!(await UserModel.isPasswordMatched(payload?.password, user?.password))) {
     throw new AppError(httpStatus.FORBIDDEN, "Password do not match");
   }
@@ -67,10 +69,13 @@ const changePassword = async (
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
   }
 
-  // checking if the user is already deleted
-  const isDeleted = user?.isDeleted;
+  // checking if the user is active
+  if (!user.isActive) {
+    throw new AppError(httpStatus.FORBIDDEN, "Your account is deactivated !");
+  }
 
-  if (isDeleted) {
+  // checking if the user is already deleted
+  if (user?.isDeleted) {
     throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
   }
 
@@ -114,10 +119,13 @@ const refreshToken = async (token: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
   }
 
-  // checking if the user is already deleted
-  const isDeleted = user?.isDeleted;
+  // checking if the user is active
+  if (!user.isActive) {
+    throw new AppError(httpStatus.FORBIDDEN, "Your account is deactivated !");
+  }
 
-  if (isDeleted) {
+  // checking if the user is already deleted
+  if (user?.isDeleted) {
     throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
   }
 
@@ -148,4 +156,8 @@ const refreshToken = async (token: string) => {
   };
 };
 
-export const AuthService = { loginUser, changePassword, refreshToken };
+export const AuthService = {
+  loginUser,
+  changePassword,
+  refreshToken,
+};

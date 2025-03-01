@@ -1,16 +1,95 @@
 import { Request, Response } from "express";
-import { requestService } from "./request.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
+import { RequestService } from "./request.service";
+import httpStatus from "http-status";
 
+// get all requests controller (admin)
 const getAllRequest = catchAsync(async (req: Request, res: Response) => {
-  const data = await requestService.getAllRequestFromDB();
+  const data = await RequestService.getAllRequestFromDB(req.query);
+
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Request retrieved successfully",
     data,
   });
 });
 
-export const RequestController = { getAllRequest };
+// create request controller (tenant)
+const createRequest = catchAsync(async (req: Request, res: Response) => {
+  const data = await RequestService.createRequestIntoDB(req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Request created successfully",
+    data,
+  });
+});
+
+// get personal requests controller (tenant & landlord)
+const getPersonalRequest = catchAsync(async (req: Request, res: Response) => {
+  const { data, meta } = await RequestService.getPersonalRequestFromDB(
+    req.user?.userId,
+    req.query,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Request retrieved successfully",
+    data,
+    meta,
+  });
+});
+
+// get single request controller (admin)
+const getSingleRequest = catchAsync(async (req: Request, res: Response) => {
+  const data = await RequestService.getSingleRequestFromDB(
+    req.params.requestId,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Request retrieved successfully",
+    data,
+  });
+});
+
+// change status of request controller (landlord)
+const changeRequestStatus = catchAsync(async (req: Request, res: Response) => {
+  const data = await RequestService.changeRequestStatusIntoDB(
+    req.params.requestId,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Request status changed successfully",
+    data,
+  });
+});
+
+// delete requests controller (admin)
+const deleteRequest = catchAsync(async (req: Request, res: Response) => {
+  const data = await RequestService.deleteRequestFromDB(req.params.requestId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Request deleted successfully",
+    data,
+  });
+});
+
+export const RequestController = {
+  getAllRequest,
+  createRequest,
+  getPersonalRequest,
+  getSingleRequest,
+  deleteRequest,
+  changeRequestStatus,
+};

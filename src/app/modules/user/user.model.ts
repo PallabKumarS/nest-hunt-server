@@ -22,6 +22,8 @@ const userSchema = new Schema<TUser, IUser>(
     passwordChangedAt: { type: Date },
     userId: { type: String, unique: true },
     isDeleted: { type: Boolean, default: false },
+    profileImage: { type: String },
+    isActive: { type: Boolean, default: true },
   },
   {
     timestamps: true,

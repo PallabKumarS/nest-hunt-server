@@ -11,6 +11,8 @@ export interface TUser {
   password: string;
   passwordChangedAt?: Date;
   isDeleted?: boolean;
+  isActive?: boolean;
+  profileImage?: string;
 }
 
 export interface IUser extends Model<TUser> {

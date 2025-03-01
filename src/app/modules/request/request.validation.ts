@@ -2,8 +2,14 @@ import { z } from "zod";
 
 const createRequestValidation = z.object({
   body: z.object({
-    name: z.string({
-      required_error: "Name is required",
+    tenantId: z.string({
+      required_error: "Tenant is required",
+    }),
+    listingId: z.string({
+      required_error: "Listing is required",
+    }),
+    landlordId: z.string({
+      required_error: "Landlord is required",
     }),
   }),
 });

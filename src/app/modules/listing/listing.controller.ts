@@ -2,14 +2,14 @@ import { Request, Response } from "express";
 import { ListingService } from "./listing.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import status from "http-status";
+import httpStatus from "http-status";
 
 // get all listing controller
 const getAllListings = catchAsync(async (req: Request, res: Response) => {
   const { data, meta } = await ListingService.getAllListingsFromDB(req.query);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Listings retrieved successfully",
     data,
@@ -24,7 +24,7 @@ const createListing = catchAsync(async (req: Request, res: Response) => {
   const result = await ListingService.createListingIntoDB(payload);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.CREATED,
     success: true,
     message: "Listing created successfully",
     data: result,
@@ -37,7 +37,7 @@ const getSingleListing = catchAsync(async (req: Request, res: Response) => {
   const result = await ListingService.getSingleListingFromDB(listingId);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Listing retrieved successfully",
     data: result,
@@ -54,7 +54,7 @@ const getPersonalListings = catchAsync(async (req: Request, res: Response) => {
   );
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Personal listings retrieved successfully",
     data,
@@ -68,7 +68,7 @@ const updateListingStatus = catchAsync(async (req: Request, res: Response) => {
 
   const result = await ListingService.updateListingStatusIntoDB(listingId);
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Listing status updated successfully",
     data: result,
@@ -83,7 +83,7 @@ const updateListing = catchAsync(async (req: Request, res: Response) => {
   const result = await ListingService.updateListingIntoDB(listingId, payload);
 
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Listing updated successfully",
     data: result,
@@ -95,7 +95,7 @@ const deleteListing = catchAsync(async (req: Request, res: Response) => {
   const listingId = req.params.listingId;
   await ListingService.deleteListingFromDB(listingId);
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Listing deleted successfully",
     data: {},

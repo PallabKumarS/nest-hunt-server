@@ -23,6 +23,6 @@ listingsSchema.statics.isListingsExists = async function (id: string) {
   return await ListingModel.findOne({ id });
 };
 
-const ListingModel = model<TListing, IListing>("Listings", listingsSchema);
+const ListingModel = model<TListing, IListing>("Listing", listingsSchema);
 
 export default ListingModel;

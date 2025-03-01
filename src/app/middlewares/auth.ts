@@ -27,8 +27,12 @@ const auth = (...requiredRoles: TUserRole[]) => {
     if (!user) {
       throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
     }
-    // checking if the user is already deleted
+    // checking if the user is active
+    if (!user.isActive) {
+      throw new AppError(httpStatus.FORBIDDEN, "Your account is deactivated !");
+    }
 
+    // checking if the user is already deleted
     const isDeleted = user?.isDeleted;
 
     if (isDeleted) {

@@ -7,9 +7,11 @@ const router = Router();
 
 router.get("/", ListingController.getAllListings);
 
+router.post("/", auth(USER_ROLE.landlord), ListingController.createListing);
+
 router.get(
   "/personal",
-  auth(USER_ROLE.landlord, USER_ROLE.admin),
+  auth(USER_ROLE.landlord),
   ListingController.getPersonalListings,
 );
 
@@ -17,12 +19,6 @@ router.get(
   "/:listingId",
   auth(USER_ROLE.landlord, USER_ROLE.tenant, USER_ROLE.admin),
   ListingController.getSingleListing,
-);
-
-router.post(
-  "/",
-  auth(USER_ROLE.landlord, USER_ROLE.admin),
-  ListingController.createListing,
 );
 
 router.patch(

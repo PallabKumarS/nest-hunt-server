@@ -1,8 +1,12 @@
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 
 export type TRequest = {
-  name: string;
+  tenantId: Types.ObjectId;
+  listingId: Types.ObjectId;
+  landlordId: Types.ObjectId;
   requestId?: string;
+  status: "pending" | "approved" | "rejected" | "paid";
+  message?: string;
 };
 
 export interface IRequest extends Model<TRequest> {

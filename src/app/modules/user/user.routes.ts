@@ -22,10 +22,16 @@ router.get(
 );
 
 router.patch(
-  "/:userId",
+  "/status/:userId",
   auth(USER_ROLE.admin),
   validateRequest(UserValidation.updateUserValidationSchema),
-  UserController.updateUser,
+  UserController.updateUserStatus,
+);
+
+router.patch(
+  "/role/:userId",
+  auth(USER_ROLE.admin),
+  UserController.updateUserRole,
 );
 
 router.delete("/:userId", auth(USER_ROLE.admin), UserController.deleteUser);
