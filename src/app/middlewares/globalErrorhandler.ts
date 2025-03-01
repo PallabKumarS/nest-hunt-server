@@ -1,35 +1,44 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
-import { ErrorRequestHandler } from 'express';
-import { ZodError } from 'zod';
-import config from '../config';
-import handleCastError from '../errors/handleCastError';
-import handleZodError from '../errors/handleZodError';
-import { TErrorSources } from '../errors/error.interface';
-import handleDuplicateError from '../errors/handleDuplicateError';
-import { AppError } from '../errors/AppError';
-import handleValidationError from '../errors/handleValidationError';
-import { TokenExpiredError } from 'jsonwebtoken';
+import { ErrorRequestHandler } from "express";
+import { ZodError } from "zod";
+import config from "../config";
+import handleCastError from "../errors/handleCastError";
+import handleZodError from "../errors/handleZodError";
+import { TErrorSources } from "../errors/error.interface";
+import handleDuplicateError from "../errors/handleDuplicateError";
+import { AppError } from "../errors/AppError";
+import handleValidationError from "../errors/handleValidationError";
+import jwt from "jsonwebtoken";
 
 const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   //setting default values
   let statusCode = 500;
-  let message = 'Something went wrong!';
+  let message = "Something went wrong!";
   let errorSources: TErrorSources = [
     {
-      path: '',
-      message: 'Something went wrong',
+      path: "",
+      message: "Something went wrong",
     },
   ];
 
   // jwt error here
-  if (err instanceof TokenExpiredError) {
+  if (err instanceof jwt.TokenExpiredError) {
     statusCode = 401;
-    message = 'Token Expired';
+    message = "Token has expired. Please log in again.";
     errorSources = [
       {
-        path: '',
-        message: 'Token Expired',
+        path: "token",
+        message: "Token expired",
+      },
+    ];
+  } else if (err instanceof jwt.JsonWebTokenError) {
+    statusCode = 401;
+    message = "Invalid token. Please log in again.";
+    errorSources = [
+      {
+        path: "token",
+        message: "Invalid token",
       },
     ];
   }
@@ -43,7 +52,7 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   }
 
   // validation error of mongoDB here
-  else if (err?.name === 'ValidationError') {
+  else if (err?.name === "ValidationError") {
     const simplifiedError = handleValidationError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
@@ -51,7 +60,7 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   }
 
   // cast error of mongoDB here
-  else if (err?.name === 'CastError') {
+  else if (err?.name === "CastError") {
     const simplifiedError = handleCastError(err);
     statusCode = simplifiedError?.statusCode;
     message = simplifiedError?.message;
@@ -72,7 +81,7 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     message = err.message;
     errorSources = [
       {
-        path: '',
+        path: "",
         message: err?.message,
       },
     ];
@@ -83,18 +92,18 @@ const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     message = err.message;
     errorSources = [
       {
-        path: '',
+        path: "",
         message: err?.message,
       },
     ];
   }
 
   //ultimate return
-  return res.status(statusCode).json({
+  res.status(statusCode).json({
     success: false,
     message,
     errorSources,
-    stack: config.node_env === 'development' ? err?.stack : null,
+    stack: config.node_env === "development" ? err?.stack : null,
   });
 };
 

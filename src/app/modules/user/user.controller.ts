@@ -1,9 +1,18 @@
-import { Request, Response } from 'express';
-import { userService } from './user.service';
+import { Request, Response } from "express";
+import { UserService } from "./user.service";
+import catchAsync from "../../utils/catchAsync";
+import sendResponse from "../../utils/sendResponse";
 
-export const userController = {
-  async getAll(req: Request, res: Response) {
-    const data = await userService.getAll();
-    res.json(data);
-  },
-};
+// get all user controller
+const getAllUser = catchAsync(async (req: Request, res: Response) => {
+  const data = await UserService.getAllUserFromDB();
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "User retrieved successfully",
+    data,
+  });
+});
+
+export const UserController = { getAllUser };
