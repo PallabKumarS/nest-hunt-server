@@ -1,36 +1,48 @@
-import { Router } from "express";
-import { RequestController } from "./request.controller";
-import auth from "../../middlewares/auth";
-import { USER_ROLE } from "../user/user.constants";
+import { Router } from 'express';
+import { RequestController } from './request.controller';
+import auth from '../../middlewares/auth';
+import { USER_ROLE } from '../user/user.constants';
 
 const router = Router();
 
-router.get("/", auth(USER_ROLE.admin), RequestController.getAllRequest);
+router.get('/', auth(USER_ROLE.admin), RequestController.getAllRequest);
 
 router.get(
-  "/personal",
+  '/personal',
   auth(USER_ROLE.tenant, USER_ROLE.landlord),
   RequestController.getPersonalRequest,
 );
 
 router.get(
-  "/:requestId",
+  '/:requestId',
   auth(USER_ROLE.admin),
   RequestController.getSingleRequest,
 );
 
-router.post("/", auth(USER_ROLE.tenant), RequestController.createRequest);
+router.post('/', auth(USER_ROLE.tenant), RequestController.createRequest);
 
 router.patch(
-  "/:requestId",
+  '/:requestId',
   auth(USER_ROLE.landlord),
   RequestController.changeRequestStatus,
 );
 
 router.delete(
-  "/:requestId",
+  '/:requestId',
   auth(USER_ROLE.admin),
   RequestController.deleteRequest,
+);
+
+router.get(
+  '/start-payment/:requestId',
+  auth(USER_ROLE.tenant),
+  RequestController.createPayment,
+);
+
+router.get(
+  '/verify-payment/:paymentId',
+  auth(USER_ROLE.tenant),
+  RequestController.verifyPayment,
 );
 
 export const RequestRoutes = router;

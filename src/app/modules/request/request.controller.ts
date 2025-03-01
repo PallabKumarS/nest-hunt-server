@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
-import catchAsync from "../../utils/catchAsync";
-import sendResponse from "../../utils/sendResponse";
-import { RequestService } from "./request.service";
-import httpStatus from "http-status";
+import { Request, Response } from 'express';
+import catchAsync from '../../utils/catchAsync';
+import sendResponse from '../../utils/sendResponse';
+import { RequestService } from './request.service';
+import httpStatus from 'http-status';
 
 // get all requests controller (admin)
 const getAllRequest = catchAsync(async (req: Request, res: Response) => {
@@ -11,7 +11,7 @@ const getAllRequest = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Request retrieved successfully",
+    message: 'Request retrieved successfully',
     data,
   });
 });
@@ -23,7 +23,7 @@ const createRequest = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
-    message: "Request created successfully",
+    message: 'Request created successfully',
     data,
   });
 });
@@ -38,7 +38,7 @@ const getPersonalRequest = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Request retrieved successfully",
+    message: 'Request retrieved successfully',
     data,
     meta,
   });
@@ -53,7 +53,7 @@ const getSingleRequest = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Request retrieved successfully",
+    message: 'Request retrieved successfully',
     data,
   });
 });
@@ -68,7 +68,7 @@ const changeRequestStatus = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Request status changed successfully",
+    message: 'Request status changed successfully',
     data,
   });
 });
@@ -80,8 +80,35 @@ const deleteRequest = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Request deleted successfully",
+    message: 'Request deleted successfully',
     data,
+  });
+});
+
+// payment controller (tenant)
+const createPayment = catchAsync(async (req: Request, res: Response) => {
+  const requestId = req.params.requestId;
+
+  const data = await RequestService.createPaymentIntoDB(requestId, req.ip!);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment process started',
+    data,
+  });
+});
+
+// verify payment and update request status controller (tenant)
+const verifyPayment = catchAsync(async (req: Request, res: Response) => {
+  const paymentId = req.params.paymentId;
+
+  const result = await RequestService.verifyPaymentFromDB(paymentId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Payment verified successfully',
+    data: result,
   });
 });
 
@@ -92,4 +119,6 @@ export const RequestController = {
   getSingleRequest,
   deleteRequest,
   changeRequestStatus,
+  createPayment,
+  verifyPayment,
 };

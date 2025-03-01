@@ -1,6 +1,6 @@
+import validateRequest from "../../middlewares/validateRequest";
 import { Router } from "express";
 import { UserController } from "./user.controller";
-import validateRequest from "../../middlewares/validateRequest";
 import { UserValidation } from "./user.validation";
 import auth from "../../middlewares/auth";
 import { USER_ROLE } from "./user.constants";
