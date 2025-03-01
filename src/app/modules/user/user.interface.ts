@@ -14,7 +14,7 @@ export interface TUser {
 }
 
 export interface IUser extends Model<TUser> {
-  isUserExists(email: string): Promise<TUser>;
+  isUserExists(email: string): Promise<TUser | null>;
 
   isPasswordMatched(
     myPlaintextPassword: string,

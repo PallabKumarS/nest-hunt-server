@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FilterQuery, Query } from "mongoose";
 
 class QueryBuilder<T> {
@@ -37,7 +36,7 @@ class QueryBuilder<T> {
 
     if (typeof queryObj.location === "string") {
       queryObj.location = {
-        $in: queryObj.location
+        $in: queryObj.location // change the location as needed as that is the field name in the database
           .split(",")
           .map((location) => new RegExp(`^${location}$`, "i")),
       };
@@ -45,10 +44,14 @@ class QueryBuilder<T> {
 
     if ("minPrice" in queryObj || "maxPrice" in queryObj) {
       const priceFilter: { $gte?: number; $lte?: number } = {};
-      if ("minPrice" in queryObj) priceFilter.$gte = Number(queryObj.minPrice);
-      if ("maxPrice" in queryObj) priceFilter.$lte = Number(queryObj.maxPrice);
+      if ("minPrice" in queryObj) {
+        priceFilter.$gte = Number(queryObj.minPrice);
+      }
+      if ("maxPrice" in queryObj) {
+        priceFilter.$lte = Number(queryObj.maxPrice);
+      }
 
-      (queryObj as any).price = priceFilter;
+      (queryObj as any).rentPrice = priceFilter; // change the rentPrice as needed as that is the field name in the database
 
       delete queryObj.minPrice;
       delete queryObj.maxPrice;

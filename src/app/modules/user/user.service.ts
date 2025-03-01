@@ -30,7 +30,7 @@ const getMeFromDB = async (email: string) => {
   return result;
 };
 
-// change status of user
+// update user into db
 const updateUserIntoDB = async (userId: string, payload: Partial<TUser>) => {
   const result = await UserModel.findOneAndUpdate({ userId }, payload, {
     new: true,

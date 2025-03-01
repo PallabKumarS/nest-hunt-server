@@ -7,6 +7,7 @@ import notFound from "./app/middlewares/notFound";
 import cookieParser from "cookie-parser";
 import { UserRoutes } from "./app/modules/user/user.routes";
 import { AuthRoutes } from "./app/modules/auth/auth.routes";
+import { ListingRoutes } from "./app/modules/listing/listing.routes";
 
 const app: Application = express();
 
@@ -25,8 +26,9 @@ app.use(cookieParser());
 app.use(express.json());
 
 // all routes here
-app.use("/api", UserRoutes);
-app.use("/api", AuthRoutes);
+app.use("/api/users", UserRoutes);
+app.use("/api/auth", AuthRoutes);
+app.use("/api/listings", ListingRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send(`

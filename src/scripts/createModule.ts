@@ -29,83 +29,91 @@ const createModule = (moduleName: string): void => {
     const filePath = path.join(baseDir, file);
     if (!fs.existsSync(filePath)) {
       let content = "";
-      const className = capitalize(moduleName);
 
-      // Templates for each file
       if (file.endsWith(".routes.ts")) {
         content = `import { Router } from "express";
-import { ${className}Controller } from "./${moduleName}.controller";
+import { ${moduleName}Controller } from "./${moduleName}.controller";
 
 const router = Router();
 
 // Define routes
-router.get("/", ${className}Controller.getAll${className});
+router.get("/", ${moduleName}Controller.getAll${capitalize(moduleName)});
 
-export const ${className}Routes = router;
-`;
+export const ${capitalize(moduleName)}Routes = router;`;
       } else if (file.endsWith(".controller.ts")) {
         content = `import { Request, Response } from "express";
-import { ${className}Service } from "./${moduleName}.service";
+import { ${moduleName}Service } from "./${moduleName}.service";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 
-const getAll${className} = catchAsync(async (req: Request, res: Response) => {
-  const data = await ${className}Service.getAll${className}FromDB();
-
+const getAll${capitalize(moduleName)} = catchAsync(async (req: Request, res: Response) => {
+  const data = await ${moduleName}Service.getAll${capitalize(moduleName)}FromDB();
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "${className} retrieved successfully",
+    message: "${capitalize(moduleName)} retrieved successfully",
     data,
   });
 });
 
-export const ${className}Controller = { getAll${className} };
-`;
+export const ${capitalize(moduleName)}Controller = { getAll${capitalize(moduleName)} };`;
       } else if (file.endsWith(".service.ts")) {
-        content = `import { get } from "http";
+        content = `import ${capitalize(moduleName)}Model from "./${moduleName}.model";
 
-const getAll${className}FromDB = async () => {
-  const result = await get("http://localhost:5000/api/v1/${moduleName}s");
+const getAll${capitalize(moduleName)}FromDB = async () => {
+  const result = await ${capitalize(moduleName)}Model.find({});
   return result;
 };
 
-export const ${className}Service = { getAll${className}FromDB };
-`;
+export const ${capitalize(moduleName)}Service = { getAll${capitalize(moduleName)}FromDB };`;
       } else if (file.endsWith(".interface.ts")) {
-        content = `export interface I${className} {
-  id: string;
+        content = `import { Model } from "mongoose";
+
+export type T${capitalize(moduleName)} = {
   name: string;
-}
-`;
+  id?: string;
+};
+
+export interface I${capitalize(moduleName)} extends Model<T${capitalize(moduleName)}> {
+  is${capitalize(moduleName)}Exists(id: string): Promise<T${capitalize(moduleName)} | null>;
+}`;
       } else if (file.endsWith(".validation.ts")) {
         content = `import { z } from "zod";
 
-const create${className}Validation = z.object({
-  name: z.string().min(1, "Name is required"),
+const create${capitalize(moduleName)}Validation = z.object({
+  body: z.object({
+    name: z.string({
+      required_error: "Name is required",
+    }),
+  }),
 });
 
-const update${className}Validation = create${className}Validation.partial();
+const update${capitalize(moduleName)}Validation = create${capitalize(moduleName)}Validation.partial();
 
-export const ${className}Validation = { create${className}Validation, update${className}Validation };
-`;
+export const ${capitalize(moduleName)}Validation = {
+  create${capitalize(moduleName)}Validation,
+  update${capitalize(moduleName)}Validation,
+};`;
       } else if (file.endsWith(".model.ts")) {
         content = `import { Schema, model, Document } from "mongoose";
+import { T${capitalize(moduleName)} } from "./${moduleName}.interface";
 
-export interface I${className}Model extends Document {
-  name: string;
-  // add more fields here
-}
+const ${moduleName}Schema = new Schema<T${capitalize(moduleName)}>(
+  {
+    name: { type: String, required: true },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const ${moduleName}Schema = new Schema<I${className}Model>({
-  name: { type: String, required: true },
-  // add more fields here
-});
+${moduleName}Schema.statics.is${capitalize(moduleName)}Exists = async function (id: string) {
+  return await ${capitalize(moduleName)}Model.findOne({ id });
+};
 
-const ${className}Model = model<I${className}Model>('${className}', ${moduleName}Schema);
+const ${capitalize(moduleName)}Model = model<T${capitalize(moduleName)}>("${capitalize(moduleName)}s", ${moduleName}Schema);
 
-export default ${className}Model;
-`;
+export default ${capitalize(moduleName)}Model;`;
       }
 
       fs.writeFileSync(filePath, content, "utf-8");
