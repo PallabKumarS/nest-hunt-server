@@ -25,8 +25,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 // all routes here
-app.use("/api/v1/users", UserRoutes);
-app.use("/api/auth", AuthRoutes);
+app.use("/api", UserRoutes);
+app.use("/api", AuthRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send(`
