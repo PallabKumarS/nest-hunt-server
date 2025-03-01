@@ -6,6 +6,7 @@ import globalErrorHandler from "./app/middlewares/globalErrorhandler";
 import notFound from "./app/middlewares/notFound";
 import cookieParser from "cookie-parser";
 import { UserRoutes } from "./app/modules/user/user.routes";
+import { AuthRoutes } from "./app/modules/auth/auth.routes";
 
 const app: Application = express();
 
@@ -25,6 +26,7 @@ app.use(express.json());
 
 // all routes here
 app.use("/api/v1/users", UserRoutes);
+app.use("/api/auth", AuthRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   res.send(`

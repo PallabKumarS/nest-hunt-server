@@ -2,14 +2,15 @@ import { Model } from "mongoose";
 import { USER_ROLE } from "./user.constants";
 
 export interface TUser {
-  id: string;
+  userId: string;
   name: string;
   email: string;
-  role: TUserRole;
+  role: "admin" | "tenant" | "landlord";
   phone: string;
   address: string;
   password: string;
   passwordChangedAt?: Date;
+  isDeleted?: boolean;
 }
 
 export interface IUser extends Model<TUser> {

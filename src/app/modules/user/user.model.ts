@@ -13,10 +13,15 @@ const userSchema = new Schema<TUser, IUser>(
     },
     phone: { type: String },
     email: { type: String, required: true, unique: true },
-    role: { type: String, enum: ["admin", "tenant", "landlord"] },
+    role: {
+      type: String,
+      enum: ["admin", "tenant", "landlord"],
+      required: true,
+    },
     address: { type: String },
     passwordChangedAt: { type: Date },
-    id: { type: String },
+    userId: { type: String, unique: true },
+    isDeleted: { type: Boolean, default: false },
   },
   {
     timestamps: true,
@@ -62,4 +67,6 @@ userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
   );
 };
 
-export const UserModel = model<TUser, IUser>("User", userSchema);
+const UserModel = model<TUser, IUser>("User", userSchema);
+
+export default UserModel;
