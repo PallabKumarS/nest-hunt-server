@@ -1,9 +1,9 @@
 import { Model, Types } from 'mongoose';
 
 export type TRequest = {
-  tenantId: Types.ObjectId;
-  listingId: Types.ObjectId;
-  landlordId: Types.ObjectId;
+  tenantId: string;
+  listingId: string;
+  landlordId: string;
   requestId?: string;
   status: 'pending' | 'approved' | 'rejected' | 'paid' | 'cancelled';
   message?: string;

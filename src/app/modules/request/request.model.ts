@@ -9,9 +9,9 @@ const requestSchema = new Schema<TRequest, IRequest>(
       enum: ['pending', 'approved', 'rejected', 'paid', 'cancelled'],
       default: 'pending',
     },
-    tenantId: { type: Schema.Types.ObjectId, ref: 'User' },
-    listingId: { type: Schema.Types.ObjectId, ref: 'Listing' },
-    landlordId: { type: Schema.Types.ObjectId, ref: 'User' },
+    tenantId: { type: String, ref: 'User' },
+    listingId: { type: String, ref: 'Listing' },
+    landlordId: { type: String, ref: 'User' },
     requestId: { type: String, unique: true },
     transaction: {
       paymentId: { type: String },

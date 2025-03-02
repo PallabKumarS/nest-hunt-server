@@ -6,7 +6,7 @@ export type TListing = {
   rentPrice: number;
   bedroomNumber: number;
   images: string[];
-  landlordId: Types.ObjectId;
+  landlordId: string;
   isAvailable?: boolean;
   listingId?: string;
   features?: string;

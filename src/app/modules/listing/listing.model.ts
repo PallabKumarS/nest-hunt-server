@@ -8,7 +8,7 @@ const listingsSchema = new Schema<TListing, IListing>(
     rentPrice: { type: Number, required: true },
     bedroomNumber: { type: Number, required: true },
     images: { type: [String], required: true },
-    landlordId: { type: Schema.Types.ObjectId, ref: 'User' },
+    landlordId: { type: String, ref: 'User' },
     isAvailable: { type: Boolean, default: false },
     listingId: { type: String },
     features: { type: String },

@@ -1,12 +1,12 @@
-import { get } from "http";
-import UserModel from "../user/user.model";
-import { AppError } from "../../errors/AppError";
-import httpStatus from "http-status";
-import config from "../../config";
-import { createToken, verifyToken } from "./auth.utils";
-import { TLoginUser } from "./auth.interface";
-import { JwtPayload } from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import { get } from 'http';
+import UserModel from '../user/user.model';
+import { AppError } from '../../errors/AppError';
+import httpStatus from 'http-status';
+import config from '../../config';
+import { createToken, verifyToken } from './auth.utils';
+import { TLoginUser } from './auth.interface';
+import { JwtPayload } from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 // login user here
 const loginUser = async (payload: TLoginUser) => {
@@ -14,27 +14,27 @@ const loginUser = async (payload: TLoginUser) => {
   const user = await UserModel.isUserExists(payload.email);
 
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
   }
 
   // checking if the user is active
   if (!user.isActive) {
-    throw new AppError(httpStatus.FORBIDDEN, "Your account is deactivated !");
+    throw new AppError(httpStatus.FORBIDDEN, 'Your account is deactivated !');
   }
 
   // checking if the user is already deleted
   if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !');
   }
 
   //checking if the password is correct
   if (!(await UserModel.isPasswordMatched(payload?.password, user?.password))) {
-    throw new AppError(httpStatus.FORBIDDEN, "Password do not match");
+    throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
   }
 
   //create token and sent to the  client
   const jwtPayload = {
-    userId: user.userId,
+    userId: user.userId as string,
     role: user.role,
     email: user.email,
   };
@@ -66,24 +66,24 @@ const changePassword = async (
   const user = await UserModel.isUserExists(userData.email);
 
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
   }
 
   // checking if the user is active
   if (!user.isActive) {
-    throw new AppError(httpStatus.FORBIDDEN, "Your account is deactivated !");
+    throw new AppError(httpStatus.FORBIDDEN, 'Your account is deactivated !');
   }
 
   // checking if the user is already deleted
   if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !');
   }
 
   //checking if the password is correct
   if (
     !(await UserModel.isPasswordMatched(payload.oldPassword, user?.password))
   ) {
-    throw new AppError(httpStatus.FORBIDDEN, "Password do not match");
+    throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
   }
 
   //hash new password
@@ -116,17 +116,17 @@ const refreshToken = async (token: string) => {
   const user = await UserModel.isUserExists(email);
 
   if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
+    throw new AppError(httpStatus.NOT_FOUND, 'This user is not found !');
   }
 
   // checking if the user is active
   if (!user.isActive) {
-    throw new AppError(httpStatus.FORBIDDEN, "Your account is deactivated !");
+    throw new AppError(httpStatus.FORBIDDEN, 'Your account is deactivated !');
   }
 
   // checking if the user is already deleted
   if (user?.isDeleted) {
-    throw new AppError(httpStatus.FORBIDDEN, "This user is deleted !");
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is deleted !');
   }
 
   if (
@@ -136,11 +136,11 @@ const refreshToken = async (token: string) => {
       iat as number,
     )
   ) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized !");
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized !');
   }
 
   const jwtPayload = {
-    userId: user.userId,
+    userId: user.userId as string,
     role: user.role,
     email: user.email,
   };
