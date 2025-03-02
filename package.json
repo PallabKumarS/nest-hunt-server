@@ -14,9 +14,8 @@
     "prettier:fix": "bun run prettier --write src",
     "create:module": "bun run src/scripts/createModule.ts"
   },
-  "name": "assignment-06-nest-hunt",
+  "name": "assignment-06-nest-hunt-server",
   "module": "src/server.ts",
-  "type": "module",
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/bun": "latest",
