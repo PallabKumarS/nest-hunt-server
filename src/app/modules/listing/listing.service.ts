@@ -1,10 +1,10 @@
-import QueryBuilder from "../../builder/QueryBuilder";
-import { AppError } from "../../errors/AppError";
-import { generateListingId } from "../../utils/generateID";
-import { listingSearchableFields } from "./listing.constant";
-import { TListing } from "./listing.interface";
-import ListingModel from "./listing.model";
-import httpStatus from "http-status";
+import QueryBuilder from '../../builder/QueryBuilder';
+import { AppError } from '../../errors/AppError';
+import { generateListingId } from '../../utils/generateID';
+import { listingSearchableFields } from './listing.constant';
+import { TListing } from './listing.interface';
+import ListingModel from './listing.model';
+import httpStatus from 'http-status';
 
 // get all listings from db
 const getAllListingsFromDB = async (query: Record<string, unknown>) => {
@@ -33,7 +33,7 @@ const getSingleListingFromDB = async (listingId: string) => {
   const isListingExists = await ListingModel.isListingExists(listingId);
 
   if (!isListingExists) {
-    throw new AppError(httpStatus.NOT_FOUND, "Listing not found");
+    throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
 
   const result = await ListingModel.findOne({ listingId });
@@ -47,7 +47,7 @@ const getPersonalListingsFromDB = async (
 ) => {
   const listingQuery = new QueryBuilder(
     ListingModel.find({
-      landLordId: userId,
+      landlordId: userId,
       isDeleted: false,
     }),
     query,
@@ -66,7 +66,7 @@ const getPersonalListingsFromDB = async (
 const updateListingStatusIntoDB = async (listingId: string) => {
   const isListing = await ListingModel.isListingExists(listingId);
   if (!isListing) {
-    throw new AppError(httpStatus.NOT_FOUND, "Listing not found");
+    throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
   const result = await ListingModel.findOneAndUpdate(
     { listingId },
@@ -84,7 +84,7 @@ const updateListingIntoDB = async (
 ) => {
   const isListing = await ListingModel.isListingExists(listingId);
   if (!isListing) {
-    throw new AppError(httpStatus.NOT_FOUND, "Listing not found");
+    throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
   const result = await ListingModel.findOneAndUpdate({ listingId }, payload, {
     new: true,
@@ -95,7 +95,7 @@ const updateListingIntoDB = async (
 const deleteListingFromDB = async (listingId: string) => {
   const isListing = await ListingModel.isListingExists(listingId);
   if (!isListing) {
-    throw new AppError(httpStatus.NOT_FOUND, "Listing not found");
+    throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
   const result = await ListingModel.findOneAndUpdate(
     { listingId },

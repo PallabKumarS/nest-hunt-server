@@ -1,11 +1,11 @@
-import { Model } from "mongoose";
-import { USER_ROLE } from "./user.constants";
+import { Model } from 'mongoose';
+import { USER_ROLE } from './user.constants';
 
 export interface TUser {
-  userId: string;
+  userId?: string;
   name: string;
   email: string;
-  role: "admin" | "tenant" | "landlord";
+  role: 'admin' | 'tenant' | 'landlord';
   phone: string;
   address: string;
   password: string;

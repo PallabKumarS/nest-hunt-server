@@ -1,4 +1,4 @@
-import { Model, Types } from "mongoose";
+import { Model, Types } from 'mongoose';
 
 export type TListing = {
   houseLocation: string;
@@ -6,7 +6,7 @@ export type TListing = {
   rentPrice: number;
   bedroomNumber: number;
   images: string[];
-  landLordId: Types.ObjectId;
+  landlordId: Types.ObjectId;
   isAvailable?: boolean;
   listingId?: string;
   features?: string;
