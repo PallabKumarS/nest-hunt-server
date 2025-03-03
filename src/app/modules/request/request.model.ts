@@ -9,6 +9,8 @@ const requestSchema = new Schema<TRequest, IRequest>(
       enum: ['pending', 'approved', 'rejected', 'paid', 'cancelled'],
       default: 'pending',
     },
+    moveInDate: { type: Date, required: true },
+    rentDuration: { type: String, required: true },
     tenantId: { type: String, ref: 'User' },
     listingId: { type: String, ref: 'Listing' },
     landlordId: { type: String, ref: 'User' },

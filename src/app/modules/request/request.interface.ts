@@ -1,4 +1,4 @@
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 export type TRequest = {
   tenantId: string;
@@ -7,6 +7,8 @@ export type TRequest = {
   requestId?: string;
   status: 'pending' | 'approved' | 'rejected' | 'paid' | 'cancelled';
   message?: string;
+  moveInDate: Date;
+  rentDuration: string;
   transaction?: {
     paymentId?: string;
     transactionStatus?: string;

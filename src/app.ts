@@ -18,7 +18,7 @@ app.use(
     origin: [
       (config.local_client as string) ||
         'https://pks-nest-hunt-client.vercel.app',
-      (config.client as string) || 'http://localhost:3',
+      (config.client as string) || 'http://localhost:3000',
     ],
     credentials: true,
   }),
