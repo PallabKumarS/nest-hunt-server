@@ -1,4 +1,4 @@
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 export type TListing = {
   houseLocation: string;
@@ -14,5 +14,5 @@ export type TListing = {
 };
 
 export interface IListing extends Model<TListing> {
-  isListingExists(id: string): Promise<TListing | null>;
+  isListingExists(listingId: string): Promise<TListing | null>;
 }

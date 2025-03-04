@@ -1,7 +1,7 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { IListing, TListing } from './listing.interface';
 
-const listingsSchema = new Schema<TListing, IListing>(
+const listingSchema = new Schema<TListing, IListing>(
   {
     houseLocation: { type: String, required: true },
     description: { type: String, required: true },
@@ -19,10 +19,10 @@ const listingsSchema = new Schema<TListing, IListing>(
   },
 );
 
-listingsSchema.statics.isListingsExists = async function (id: string) {
-  return await ListingModel.findOne({ id });
+listingSchema.statics.isListingExists = async function (listingId: string) {
+  return await ListingModel.findOne({ listingId });
 };
 
-const ListingModel = model<TListing, IListing>('Listing', listingsSchema);
+const ListingModel = model<TListing, IListing>('Listing', listingSchema);
 
 export default ListingModel;

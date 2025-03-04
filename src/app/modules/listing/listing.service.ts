@@ -30,9 +30,9 @@ const createListingIntoDB = async (payload: TListing) => {
 
 // get single listing from db
 const getSingleListingFromDB = async (listingId: string) => {
-  const isListingExists = await ListingModel.isListingExists(listingId);
+  const isExists = await ListingModel.isListingExists(listingId);
 
-  if (!isListingExists) {
+  if (!isExists) {
     throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
 

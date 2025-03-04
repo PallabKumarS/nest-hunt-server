@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
-import { UserService } from "./user.service";
-import catchAsync from "../../utils/catchAsync";
-import sendResponse from "../../utils/sendResponse";
-import httpStatus from "http-status";
+import { Request, Response } from 'express';
+import { UserService } from './user.service';
+import catchAsync from '../../utils/catchAsync';
+import sendResponse from '../../utils/sendResponse';
+import httpStatus from 'http-status';
 
 // create user controller
 const createUser = catchAsync(async (req, res) => {
@@ -11,7 +11,7 @@ const createUser = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "User is created successfully",
+    message: 'User is created successfully',
     data: result,
   });
 });
@@ -25,7 +25,7 @@ const getMe = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "User is retrieved successfully",
+    message: 'User is retrieved successfully',
     data: result,
   });
 });
@@ -37,7 +37,7 @@ const getAllUsers = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Users are retrieved successfully",
+    message: 'Users are retrieved successfully',
     data,
     meta,
   });
@@ -52,21 +52,27 @@ const updateUserStatus = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Status is updated successfully",
+    message: 'Status is updated successfully',
     data: result,
   });
 });
 
 // update user controller
 const updateUser = catchAsync(async (req, res) => {
-  const userId = req.params.userId;
 
-  const result = await UserService.updateUserIntoDB(userId, req.body);
+  const userId = req.params.userId;
+  const user = req.user;
+
+  const result = await UserService.updateUserIntoDB(
+    userId,
+    req.body,
+    user.email,
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Status is updated successfully",
+    message: 'Status is updated successfully',
     data: result,
   });
 });
@@ -80,7 +86,7 @@ const updateUserRole = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "User role is updated successfully!",
+    message: 'User role is updated successfully!',
     data: result,
   });
 });
@@ -93,7 +99,7 @@ const deleteUser = catchAsync(async (req, res) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "User is deleted successfully",
+    message: 'User is deleted successfully',
     data: result,
   });
 });

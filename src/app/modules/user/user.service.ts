@@ -1,9 +1,9 @@
-import QueryBuilder from "../../builder/QueryBuilder";
-import { AppError } from "../../errors/AppError";
-import { generateUserId } from "../../utils/generateID";
-import { TUser } from "./user.interface";
-import UserModel from "./user.model";
-import httpStatus from "http-status";
+import QueryBuilder from '../../builder/QueryBuilder';
+import { AppError } from '../../errors/AppError';
+import { generateUserId } from '../../utils/generateID';
+import { TUser } from './user.interface';
+import UserModel from './user.model';
+import httpStatus from 'http-status';
 
 // create user into db
 const createUserIntoDB = async (payload: Partial<TUser>) => {
@@ -11,7 +11,7 @@ const createUserIntoDB = async (payload: Partial<TUser>) => {
   if (isEmailExist) {
     throw new AppError(
       httpStatus.BAD_REQUEST,
-      "Email already exist. Login instead.",
+      'Email already exist. Login instead.',
     );
   }
 
@@ -59,7 +59,34 @@ const updateUserStatusIntoDB = async (userId: string) => {
 };
 
 // update user into db
-const updateUserIntoDB = async (userId: string, payload: Partial<TUser>) => {
+const updateUserIntoDB = async (
+  userId: string,
+  payload: Partial<TUser>,
+  email: string,
+) => {
+  const isUserExist = await UserModel.isUserExists(email);
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User does not exist');
+  }
+
+  // check if user is updating his own profile
+  if (isUserExist.role !== 'admin' && isUserExist.userId !== userId) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'You can only update your own profile',
+    );
+  }
+
+  // checking if  email is being used by another user
+  const isEmailExist = await UserModel.findOne({ email: payload.email });
+
+  if (isEmailExist && isUserExist.email !== payload.email) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'Email already exist. Use another instead.',
+    );
+  }
   const result = await UserModel.findOneAndUpdate({ userId }, payload, {
     new: true,
   });
