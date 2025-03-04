@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
-import { ListingService } from "./listing.service";
-import catchAsync from "../../utils/catchAsync";
-import sendResponse from "../../utils/sendResponse";
-import httpStatus from "http-status";
+import { Request, Response } from 'express';
+import { ListingService } from './listing.service';
+import catchAsync from '../../utils/catchAsync';
+import sendResponse from '../../utils/sendResponse';
+import httpStatus from 'http-status';
 
 // get all listing controller
 const getAllListings = catchAsync(async (req: Request, res: Response) => {
@@ -11,7 +11,7 @@ const getAllListings = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Listings retrieved successfully",
+    message: 'Listings retrieved successfully',
     data,
     meta,
   });
@@ -26,7 +26,7 @@ const createListing = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
-    message: "Listing created successfully",
+    message: 'Listing created successfully',
     data: result,
   });
 });
@@ -39,7 +39,7 @@ const getSingleListing = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Listing retrieved successfully",
+    message: 'Listing retrieved successfully',
     data: result,
   });
 });
@@ -56,7 +56,7 @@ const getPersonalListings = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Personal listings retrieved successfully",
+    message: 'Personal listings retrieved successfully',
     data,
     meta,
   });
@@ -70,7 +70,7 @@ const updateListingStatus = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Listing status updated successfully",
+    message: 'Listing status updated successfully',
     data: result,
   });
 });
@@ -85,7 +85,7 @@ const updateListing = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Listing updated successfully",
+    message: 'Listing updated successfully',
     data: result,
   });
 });
@@ -97,8 +97,19 @@ const deleteListing = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Listing deleted successfully",
+    message: 'Listing deleted successfully',
     data: {},
+  });
+});
+
+const getListingLocations = catchAsync(async (req: Request, res: Response) => {
+  const result = await ListingService.getListingLocationsFromDB();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Listing locations retrieved successfully',
+    data: result,
   });
 });
 
@@ -110,4 +121,5 @@ export const ListingController = {
   updateListing,
   deleteListing,
   createListing,
+  getListingLocations,
 };

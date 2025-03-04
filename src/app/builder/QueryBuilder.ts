@@ -12,6 +12,8 @@ class QueryBuilder<T> {
   search(searchableFields: string[]) {
     const searchTerm = this?.query?.searchTerm;
 
+    console.log(this.query);
+
     if (searchTerm) {
       this.modelQuery = this.modelQuery.find({
         $or: searchableFields.map((field) => {
@@ -42,9 +44,9 @@ class QueryBuilder<T> {
 
     excludeFields.forEach((el) => delete queryObj[el]);
 
-    if (typeof queryObj.location === 'string') {
-      queryObj.location = {
-        $in: queryObj.location // change the location as needed as that is the field name in the database
+    if (typeof queryObj.houseLocation === 'string') {
+      queryObj.houseLocation = {
+        $in: queryObj.houseLocation // change the location as needed as that is the field name in the database
           .split(',')
           .map((location) => new RegExp(`^${location}$`, 'i')),
       };

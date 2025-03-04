@@ -114,6 +114,28 @@ const deleteListingFromDB = async (listingId: string) => {
   return result;
 };
 
+// get listing locations from db
+const getListingLocationsFromDB = async () => {
+  const result = await ListingModel.aggregate([
+    // first pipeline
+    {
+      $group: {
+        _id: '$houseLocation',
+      },
+    },
+
+    // second pipeline
+    {
+      $project: {
+        location: '$_id',
+        _id: 0,
+      },
+    },
+  ]);
+
+  return result;
+};
+
 export const ListingService = {
   getAllListingsFromDB,
   createListingIntoDB,
@@ -122,4 +144,5 @@ export const ListingService = {
   updateListingStatusIntoDB,
   updateListingIntoDB,
   deleteListingFromDB,
+  getListingLocationsFromDB,
 };
