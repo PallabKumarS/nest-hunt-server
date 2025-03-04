@@ -1,4 +1,4 @@
-import { FilterQuery, Query } from "mongoose";
+import { FilterQuery, Query } from 'mongoose';
 
 class QueryBuilder<T> {
   public modelQuery: Query<T[], T>;
@@ -11,14 +11,22 @@ class QueryBuilder<T> {
 
   search(searchableFields: string[]) {
     const searchTerm = this?.query?.searchTerm;
+
     if (searchTerm) {
       this.modelQuery = this.modelQuery.find({
-        $or: searchableFields.map(
-          (field) =>
-            ({
-              [field]: { $regex: searchTerm, $options: "i" },
-            }) as FilterQuery<T>,
-        ),
+        $or: searchableFields.map((field) => {
+          if (field === 'rentPrice' || field === 'bedroomNumber') {
+            const numericValue = Number(searchTerm);
+            if (!isNaN(numericValue))
+              return {
+                [field]: numericValue,
+              };
+            return { [field]: null };
+          }
+          return {
+            [field]: { $regex: searchTerm, $options: 'i' },
+          };
+        }) as FilterQuery<T>[],
       });
     }
 
@@ -30,24 +38,24 @@ class QueryBuilder<T> {
     const queryObj = { ...this.query }; // copy
 
     // Filtering
-    const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
+    const excludeFields = ['searchTerm', 'sort', 'limit', 'page', 'fields'];
 
     excludeFields.forEach((el) => delete queryObj[el]);
 
-    if (typeof queryObj.location === "string") {
+    if (typeof queryObj.location === 'string') {
       queryObj.location = {
         $in: queryObj.location // change the location as needed as that is the field name in the database
-          .split(",")
-          .map((location) => new RegExp(`^${location}$`, "i")),
+          .split(',')
+          .map((location) => new RegExp(`^${location}$`, 'i')),
       };
     }
 
-    if ("minPrice" in queryObj || "maxPrice" in queryObj) {
+    if ('minPrice' in queryObj || 'maxPrice' in queryObj) {
       const priceFilter: { $gte?: number; $lte?: number } = {};
-      if ("minPrice" in queryObj) {
+      if ('minPrice' in queryObj) {
         priceFilter.$gte = Number(queryObj.minPrice);
       }
-      if ("maxPrice" in queryObj) {
+      if ('maxPrice' in queryObj) {
         priceFilter.$lte = Number(queryObj.maxPrice);
       }
 
@@ -65,7 +73,7 @@ class QueryBuilder<T> {
   // sorting here
   sort() {
     const sort =
-      (this?.query?.sort as string)?.split(",")?.join(" ") || "-createdAt";
+      (this?.query?.sort as string)?.split(',')?.join(' ') || '-createdAt';
 
     this.modelQuery = this.modelQuery.sort(sort as string);
 
@@ -84,7 +92,7 @@ class QueryBuilder<T> {
 
   fields() {
     const fields =
-      (this?.query?.fields as string)?.replace(/,/g, " ") || "-__v";
+      (this?.query?.fields as string)?.replace(/,/g, ' ') || '-__v';
 
     this.modelQuery = this.modelQuery.select(fields);
     return this;

@@ -8,7 +8,14 @@ import httpStatus from 'http-status';
 
 // get all listings from db
 const getAllListingsFromDB = async (query: Record<string, unknown>) => {
-  const listingQuery = new QueryBuilder(ListingModel.find({}), query)
+  const listingQuery = new QueryBuilder(
+    ListingModel.find({
+      isDeleted: {
+        $ne: true,
+      },
+    }),
+    query,
+  )
     .search(listingSearchableFields)
     .filter()
     .sort()

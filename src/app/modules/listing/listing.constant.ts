@@ -1,5 +1,5 @@
 export const listingSearchableFields = [
-  "bedroomNumber",
-  "location",
-  "rentPrice",
+  'bedroomNumber',
+  'houseLocation',
+  'rentPrice',
 ];
