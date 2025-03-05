@@ -48,9 +48,15 @@ const getAllUsersFromDB = async (query: Record<string, unknown>) => {
 
 // update user into db
 const updateUserStatusIntoDB = async (userId: string) => {
+  const isUserExist = await UserModel.findOne({ userId });
+
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User does not exist');
+  }
+
   const result = await UserModel.findOneAndUpdate(
     { userId },
-    { isActive: false },
+    { isActive: !isUserExist.isActive },
     {
       new: true,
     },
@@ -95,6 +101,18 @@ const updateUserIntoDB = async (
 
 // update user role into db
 const updateUserRoleIntoDB = async (userId: string, role: string) => {
+  const isUserExist = await UserModel.findOne({ userId });
+  if (!isUserExist) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User does not exist');
+  }
+
+  if (isUserExist.role === 'admin') {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'This user is an admin. You cannot change his role.',
+    );
+  }
+
   const result = await UserModel.findOneAndUpdate(
     {
       userId,

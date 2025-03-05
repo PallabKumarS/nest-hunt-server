@@ -1,6 +1,7 @@
 import QueryBuilder from '../../builder/QueryBuilder';
 import { AppError } from '../../errors/AppError';
 import { generateListingId } from '../../utils/generateID';
+import RequestModel from '../request/request.model';
 import { listingSearchableFields } from './listing.constant';
 import { TListing } from './listing.interface';
 import ListingModel from './listing.model';
@@ -8,14 +9,7 @@ import httpStatus from 'http-status';
 
 // get all listings from db
 const getAllListingsFromDB = async (query: Record<string, unknown>) => {
-  const listingQuery = new QueryBuilder(
-    ListingModel.find({
-      isDeleted: {
-        $ne: true,
-      },
-    }),
-    query,
-  )
+  const listingQuery = new QueryBuilder(ListingModel.find({}), query)
     .search(listingSearchableFields)
     .filter()
     .sort()
@@ -43,7 +37,7 @@ const getSingleListingFromDB = async (listingId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
 
-  const result = await ListingModel.findOne({ listingId });
+  const result = await ListingModel.findOne({ listingId, isDeleted: false });
   return result;
 };
 
@@ -75,9 +69,16 @@ const updateListingStatusIntoDB = async (listingId: string) => {
   if (!isListing) {
     throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
+
+  const request = await RequestModel.findOne({ listingId: listingId });
+
+  if (request?.status === 'paid' && !isListing.isAvailable) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Listing is already rented');
+  }
+
   const result = await ListingModel.findOneAndUpdate(
     { listingId },
-    { isAvailable: false },
+    { isAvailable: !isListing.isAvailable },
     {
       new: true,
     },
@@ -104,13 +105,7 @@ const deleteListingFromDB = async (listingId: string) => {
   if (!isListing) {
     throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
-  const result = await ListingModel.findOneAndUpdate(
-    { listingId },
-    { isDeleted: true },
-    {
-      new: true,
-    },
-  );
+  const result = await ListingModel.findOneAndDelete({ listingId });
   return result;
 };
 

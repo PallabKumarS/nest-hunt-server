@@ -12,7 +12,6 @@ class QueryBuilder<T> {
   search(searchableFields: string[]) {
     const searchTerm = this?.query?.searchTerm;
 
-    console.log(this.query);
 
     if (searchTerm) {
       this.modelQuery = this.modelQuery.find({
