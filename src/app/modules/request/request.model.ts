@@ -15,6 +15,7 @@ const requestSchema = new Schema<TRequest, IRequest>(
     listingId: { type: String, ref: 'Listing' },
     landlordId: { type: String, ref: 'User' },
     requestId: { type: String, unique: true },
+    landlordPhoneNumber: { type: String },
     transaction: {
       paymentId: { type: String },
       transactionStatus: { type: String },

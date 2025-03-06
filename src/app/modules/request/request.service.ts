@@ -250,6 +250,29 @@ const changeRequestStatusIntoDB = async (
   }
 };
 
+// update request from db
+const updateRequestIntoDB = async (
+  requestId: string,
+  payload: Partial<TRequest>,
+) => {
+  try {
+    const isRequestExists = await RequestModel.findOne({ requestId });
+
+    if (!isRequestExists) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Request not found');
+    }
+    const result = await RequestModel.findOneAndUpdate({ requestId }, payload, {
+      new: true,
+    });
+    if (!result) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update request');
+    }
+    return result;
+  } catch (err: any) {
+    throw new Error(err);
+  }
+};
+
 // delete request from db (admin)
 const deleteRequestFromDB = async (requestId: string) => {
   const isRequestExists = await RequestModel.findOne({ requestId });
@@ -441,4 +464,5 @@ export const RequestService = {
   changeRequestStatusIntoDB,
   createPaymentIntoDB,
   verifyPaymentFromDB,
+  updateRequestIntoDB,
 };

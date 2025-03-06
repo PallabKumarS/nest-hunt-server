@@ -28,7 +28,12 @@ const loginUser = async (payload: TLoginUser) => {
   }
 
   //checking if the password is correct
-  if (!(await UserModel.isPasswordMatched(payload?.password, user?.password))) {
+  if (
+    !(await UserModel.isPasswordMatched(
+      payload?.password,
+      user?.password as string,
+    ))
+  ) {
     throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
   }
 
@@ -81,7 +86,10 @@ const changePassword = async (
 
   //checking if the password is correct
   if (
-    !(await UserModel.isPasswordMatched(payload.oldPassword, user?.password))
+    !(await UserModel.isPasswordMatched(
+      payload.oldPassword,
+      user?.password as string,
+    ))
   ) {
     throw new AppError(httpStatus.FORBIDDEN, 'Password do not match');
   }

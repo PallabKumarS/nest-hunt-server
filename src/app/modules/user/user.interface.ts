@@ -6,8 +6,8 @@ export interface TUser {
   name: string;
   email: string;
   role: 'admin' | 'tenant' | 'landlord';
-  phone: string;
-  address: string;
+  phone?: string;
+  address?: string;
   password: string;
   passwordChangedAt?: Date;
   isDeleted?: boolean;

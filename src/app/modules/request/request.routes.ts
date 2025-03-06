@@ -28,6 +28,12 @@ router.patch(
 );
 
 router.patch(
+  '/:requestId',
+  auth(USER_ROLE.landlord, USER_ROLE.admin),
+  RequestController.updateRequest,
+);
+
+router.patch(
   '/create-payment/:requestId',
   auth(USER_ROLE.tenant),
   RequestController.createPayment,

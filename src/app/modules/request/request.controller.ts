@@ -3,6 +3,7 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { RequestService } from './request.service';
 import httpStatus from 'http-status';
+import { request } from 'http';
 
 // get all requests controller (admin)
 const getAllRequest = catchAsync(async (req: Request, res: Response) => {
@@ -73,6 +74,21 @@ const changeRequestStatus = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// update request controller
+const updateRequest = catchAsync(async (req: Request, res: Response) => {
+  const data = await RequestService.updateRequestIntoDB(
+    req.params.requestId,
+    req.body,
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Request updated successfully',
+    data,
+  });
+});
+
 // delete requests controller (admin)
 const deleteRequest = catchAsync(async (req: Request, res: Response) => {
   const data = await RequestService.deleteRequestFromDB(req.params.requestId);
@@ -121,4 +137,5 @@ export const RequestController = {
   changeRequestStatus,
   createPayment,
   verifyPayment,
+  updateRequest,
 };
