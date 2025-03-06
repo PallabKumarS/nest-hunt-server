@@ -7,6 +7,11 @@ import { AppError } from '../../errors/AppError';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import ListingModel from '../listing/listing.model';
+import {
+  sendPaymentConfirmationEmail,
+  sendRequestStatusChangeEmail,
+} from '../../utils/sendMail';
+import UserModel from '../user/user.model';
 
 interface PopulatedListing {
   rentPrice: number;
@@ -68,22 +73,61 @@ const getAllRequestFromDB = async (query: Record<string, unknown>) => {
 
 // create request in the db (tenant)
 const createRequestIntoDB = async (payload: TRequest) => {
-  payload.requestId = await generateRequestId();
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  const isRequestExists = await RequestModel.findOne({
-    listingId: payload.listingId,
-    tenantId: payload.tenantId,
-  });
+  try {
+    payload.requestId = await generateRequestId();
 
-  if (isRequestExists) {
-    throw new AppError(
-      httpStatus.BAD_REQUEST,
-      'You have already applied for this listing',
+    const isRequestExists = await RequestModel.findOne({
+      listingId: payload.listingId,
+      tenantId: payload.tenantId,
+    });
+
+    if (isRequestExists) {
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        'You have already applied for this listing',
+      );
+    }
+
+    const result = await RequestModel.create([payload], { session });
+
+    if (result?.length === 0) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create request');
+    }
+
+    const user = await UserModel.findOne({ userId: payload.landlordId });
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    const listing = await ListingModel.findOne({
+      listingId: payload.listingId,
+    });
+    if (!listing) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
+    }
+
+    const info = await sendRequestStatusChangeEmail(
+      user?.email,
+      payload?.requestId as string,
+      payload?.status,
+      payload?.listingId,
+      listing?.houseLocation,
     );
-  }
+    if (info.accepted.length === 0) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Email not sent');
+    }
+    await session.commitTransaction();
+    session.endSession();
 
-  const result = await RequestModel.create(payload);
-  return result;
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    session.endSession();
+    throw new Error(err);
+  }
 };
 
 // get personal requests from db (tenant & landlord)
@@ -146,25 +190,64 @@ const changeRequestStatusIntoDB = async (
   requestId: string,
   status: { status: string },
 ) => {
-  const isRequestExists = await RequestModel.findOne({ requestId });
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  if (!isRequestExists) {
-    throw new AppError(httpStatus.NOT_FOUND, 'Request not found');
+  try {
+    const isRequestExists = await RequestModel.findOne({ requestId });
+
+    if (!isRequestExists) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Request not found');
+    }
+
+    if (isRequestExists.status === 'paid') {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Request already paid');
+    }
+
+    const result = await RequestModel.findOneAndUpdate(
+      { requestId },
+      { status: status.status },
+      {
+        new: true,
+        session,
+      },
+    );
+
+    if (!result) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update request');
+    }
+
+    const user = await UserModel.findOne({ userId: result?.tenantId });
+    if (!user) {
+      throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    const listing = await ListingModel.findOne({
+      listingId: result.listingId,
+    });
+    if (!listing) {
+      throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
+    }
+
+    const info = await sendRequestStatusChangeEmail(
+      user?.email,
+      result?.requestId as string,
+      result?.status,
+      result?.listingId,
+      listing?.houseLocation,
+    );
+    if (info.accepted.length === 0) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Email not sent');
+    }
+    await session.commitTransaction();
+    session.endSession();
+
+    return result;
+  } catch (err: any) {
+    await session.abortTransaction();
+    session.endSession();
+    throw new Error(err);
   }
-
-  if (isRequestExists.status === 'paid') {
-    throw new AppError(httpStatus.BAD_REQUEST, 'Request already paid');
-  }
-
-  const result = await RequestModel.findOneAndUpdate(
-    { requestId },
-    { status: status.status },
-    {
-      new: true,
-    },
-  );
-
-  return result;
 };
 
 // delete request from db (admin)
@@ -316,6 +399,25 @@ const verifyPaymentFromDB = async (paymentId: string) => {
 
       if (!updatedListing) {
         throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update listing');
+      }
+
+      const user = await UserModel.findOne({
+        userId: updatedRequest?.tenantId,
+      });
+      if (!user) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'User not found');
+      }
+
+      const info = await sendPaymentConfirmationEmail(
+        user?.email,
+        updatedRequest?.requestId as string,
+        updatedRequest?.transaction?.paymentId as string,
+        updatedListing?.listingId as string,
+        updatedListing?.rentPrice,
+      );
+
+      if (info.accepted.length === 0) {
+        throw new AppError(httpStatus.BAD_REQUEST, 'Email not sent');
       }
 
       await session.commitTransaction();

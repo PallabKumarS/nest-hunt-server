@@ -41,7 +41,7 @@ router.patch(
 
 router.delete(
   '/:requestId',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.tenant),
   RequestController.deleteRequest,
 );
 
