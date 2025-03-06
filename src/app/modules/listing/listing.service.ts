@@ -9,7 +9,14 @@ import httpStatus from 'http-status';
 
 // get all listings from db
 const getAllListingsFromDB = async (query: Record<string, unknown>) => {
-  const listingQuery = new QueryBuilder(ListingModel.find({}), query)
+  const listingQuery = new QueryBuilder(
+    ListingModel.find({}).populate({
+      path: 'landlordId',
+      localField: 'landlordId',
+      foreignField: 'userId',
+    }),
+    query,
+  )
     .search(listingSearchableFields)
     .filter()
     .sort()
@@ -37,7 +44,14 @@ const getSingleListingFromDB = async (listingId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, 'Listing not found');
   }
 
-  const result = await ListingModel.findOne({ listingId, isDeleted: false });
+  const result = await ListingModel.findOne({
+    listingId,
+    isDeleted: false,
+  }).populate({
+    path: 'landlordId',
+    localField: 'landlordId',
+    foreignField: 'userId',
+  });
   return result;
 };
 

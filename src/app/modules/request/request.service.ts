@@ -8,9 +8,54 @@ import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import ListingModel from '../listing/listing.model';
 
+interface PopulatedListing {
+  rentPrice: number;
+  houseLocation: string;
+}
+
+interface PopulatedTenant {
+  name: string;
+  address: string;
+  email: string;
+  phone: string;
+}
+
+interface PopulatedLandlord {
+  userId: string;
+}
+
+type PopulatedRequest = {
+  listingId: PopulatedListing;
+  tenantId: PopulatedTenant;
+  landlordId: PopulatedLandlord;
+  requestId: string;
+  status: 'pending' | 'approved' | 'rejected' | 'paid' | 'cancelled';
+  message?: string;
+  moveInDate: Date;
+  rentDuration: string;
+  transaction?: Record<string, any>;
+};
 // get all requests from db (admin)
 const getAllRequestFromDB = async (query: Record<string, unknown>) => {
-  const requestQuery = new QueryBuilder(RequestModel.find({}), query)
+  const requestQuery = new QueryBuilder(
+    RequestModel.find({})
+      .populate({
+        path: 'listingId',
+        localField: 'listingId',
+        foreignField: 'listingId',
+      })
+      .populate({
+        path: 'tenantId',
+        localField: 'tenantId',
+        foreignField: 'userId',
+      })
+      .populate({
+        path: 'landlordId',
+        localField: 'landlordId',
+        foreignField: 'userId',
+      }),
+    query,
+  )
     .filter()
     .sort()
     .paginate();
@@ -25,6 +70,18 @@ const getAllRequestFromDB = async (query: Record<string, unknown>) => {
 const createRequestIntoDB = async (payload: TRequest) => {
   payload.requestId = await generateRequestId();
 
+  const isRequestExists = await RequestModel.findOne({
+    listingId: payload.listingId,
+    tenantId: payload.tenantId,
+  });
+
+  if (isRequestExists) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      'You have already applied for this listing',
+    );
+  }
+
   const result = await RequestModel.create(payload);
   return result;
 };
@@ -38,9 +95,21 @@ const getPersonalRequestFromDB = async (
     RequestModel.find({
       $or: [{ tenantId: userId }, { landlordId: userId }],
     })
-      .populate('listingId')
-      .populate('tenantId')
-      .populate('landlordId'),
+      .populate({
+        path: 'listingId',
+        localField: 'listingId',
+        foreignField: 'listingId',
+      })
+      .populate({
+        path: 'tenantId',
+        localField: 'tenantId',
+        foreignField: 'userId',
+      })
+      .populate({
+        path: 'landlordId',
+        localField: 'landlordId',
+        foreignField: 'userId',
+      }),
     query,
   );
 
@@ -53,27 +122,63 @@ const getPersonalRequestFromDB = async (
 // get single request from db (admin)
 const getSingleRequestFromDB = async (requestId: string) => {
   const result = await RequestModel.findOne({ requestId })
-    .populate('listingId')
-    .populate('tenantId')
-    .populate('landlordId');
+    .populate({
+      path: 'listingId',
+      localField: 'listingId',
+      foreignField: 'listingId',
+    })
+    .populate({
+      path: 'tenantId',
+      localField: 'tenantId',
+      foreignField: 'userId',
+    })
+    .populate({
+      path: 'landlordId',
+      localField: 'landlordId',
+      foreignField: 'userId',
+    });
 
   return result;
 };
 
 // change request status from db (landlord)
-const changeRequestStatusIntoDB = async (requestId: string, status: string) => {
+const changeRequestStatusIntoDB = async (
+  requestId: string,
+  status: { status: string },
+) => {
+  const isRequestExists = await RequestModel.findOne({ requestId });
+
+  if (!isRequestExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Request not found');
+  }
+
+  if (isRequestExists.status === 'paid') {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Request already paid');
+  }
+
   const result = await RequestModel.findOneAndUpdate(
     { requestId },
-    { status },
+    { status: status.status },
     {
       new: true,
     },
   );
+
   return result;
 };
 
 // delete request from db (admin)
 const deleteRequestFromDB = async (requestId: string) => {
+  const isRequestExists = await RequestModel.findOne({ requestId });
+
+  if (!isRequestExists) {
+    throw new AppError(httpStatus.NOT_FOUND, 'Request not found');
+  }
+
+  if (isRequestExists.status === 'paid') {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Request already paid');
+  }
+
   const result = await RequestModel.findOneAndDelete({ requestId });
   return result;
 };
@@ -81,34 +186,40 @@ const deleteRequestFromDB = async (requestId: string) => {
 // create payment in the db (tenant)
 const createPaymentIntoDB = async (requestId: string, client_ip: string) => {
   try {
-    const requestData = await RequestModel.findOne({ requestId })
-      .populate<{ listingId: { rentPrice: number; houseLocation: string } }>(
-        'listingId',
-      )
-      .populate<{
-        tenantId: {
-          name: string;
-          address: string;
-          phone: string;
-          email: string;
-        };
-      }>('tenantId')
-      .populate('landlordId')
-      .exec();
+    const requestData = (await RequestModel.findOne({ requestId })
+      .populate({
+        path: 'listingId',
+        localField: 'listingId',
+        foreignField: 'listingId',
+      })
+      .populate({
+        path: 'tenantId',
+        localField: 'tenantId',
+        foreignField: 'userId',
+      })
+      .populate({
+        path: 'landlordId',
+        localField: 'landlordId',
+        foreignField: 'userId',
+      })
+      .lean()
+      .exec()) as unknown as PopulatedRequest;
 
     const shurjopayPayload = {
       amount: requestData?.listingId.rentPrice,
       order_id: requestId,
       currency: 'BDT',
       customer_name: requestData?.tenantId.name,
-      customer_address: requestData?.tenantId.address,
+      customer_address: requestData?.tenantId?.address || 'N/A',
       customer_email: requestData?.tenantId.email,
-      customer_phone: requestData?.tenantId.phone || 'N/A',
+      customer_phone: requestData?.tenantId?.phone || 'N/A',
       customer_city: requestData?.listingId.houseLocation || 'N/A',
       client_ip,
     };
 
     const payment = await makePaymentAsync(shurjopayPayload);
+
+    console.log(payment);
 
     let updatedRequest: TRequest | null = null;
 
@@ -216,7 +327,7 @@ const verifyPaymentFromDB = async (paymentId: string) => {
     }
   }
 
-  return payment;
+  return payment[0];
 };
 
 export const RequestService = {

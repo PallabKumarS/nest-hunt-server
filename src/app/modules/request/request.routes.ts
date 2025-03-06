@@ -15,34 +15,34 @@ router.get(
 
 router.get(
   '/:requestId',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.tenant),
   RequestController.getSingleRequest,
 );
 
 router.post('/', auth(USER_ROLE.tenant), RequestController.createRequest);
 
 router.patch(
-  '/:requestId',
+  '/status/:requestId',
   auth(USER_ROLE.landlord),
   RequestController.changeRequestStatus,
+);
+
+router.patch(
+  '/create-payment/:requestId',
+  auth(USER_ROLE.tenant),
+  RequestController.createPayment,
+);
+
+router.patch(
+  '/verify-payment/:paymentId',
+  auth(USER_ROLE.tenant),
+  RequestController.verifyPayment,
 );
 
 router.delete(
   '/:requestId',
   auth(USER_ROLE.admin),
   RequestController.deleteRequest,
-);
-
-router.get(
-  '/start-payment/:requestId',
-  auth(USER_ROLE.tenant),
-  RequestController.createPayment,
-);
-
-router.get(
-  '/verify-payment/:paymentId',
-  auth(USER_ROLE.tenant),
-  RequestController.verifyPayment,
 );
 
 export const RequestRoutes = router;
