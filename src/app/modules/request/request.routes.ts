@@ -39,7 +39,7 @@ router.patch(
   RequestController.createPayment,
 );
 
-router.patch(
+router.get(
   '/verify-payment/:paymentId',
   auth(USER_ROLE.tenant),
   RequestController.verifyPayment,

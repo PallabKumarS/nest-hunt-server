@@ -325,7 +325,9 @@ const createPaymentIntoDB = async (requestId: string, client_ip: string) => {
 
     const payment = await makePaymentAsync(shurjopayPayload);
 
-    console.log(payment);
+    if (!payment) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create payment');
+    }
 
     let updatedRequest: TRequest | null = null;
 
@@ -335,7 +337,7 @@ const createPaymentIntoDB = async (requestId: string, client_ip: string) => {
         {
           $set: {
             transaction: {
-              paymentId: payment.sp_order_id,
+              paymentId: payment.sp_order_id as string,
               transactionStatus: payment.transactionStatus,
               paymentUrl: payment.checkout_url,
             },
@@ -357,12 +359,19 @@ const createPaymentIntoDB = async (requestId: string, client_ip: string) => {
 
 // verify payment from db (tenant)
 const verifyPaymentFromDB = async (paymentId: string) => {
+  console.log(paymentId);
   const payment = await verifyPaymentAsync(paymentId);
 
+  const findOne = await RequestModel.findOne({
+    'transaction.paymentId': paymentId,
+  });
+
+  console.log(findOne,payment);
+
   if (payment.length) {
-    await RequestModel.findOneAndUpdate(
+    const updated = await RequestModel.findOneAndUpdate(
       {
-        'transaction.paymentId': paymentId,
+        'transaction.paymentId': String(paymentId),
       },
       {
         'transaction.bankStatus': payment[0].bank_status,
@@ -381,6 +390,10 @@ const verifyPaymentFromDB = async (paymentId: string) => {
                 : 'pending',
       },
     );
+
+    if (!updated) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Failed to update order');
+    }
   }
 
   // if the payment is successful, update the bike quantity
@@ -393,6 +406,7 @@ const verifyPaymentFromDB = async (paymentId: string) => {
       const requestExists = await RequestModel.findOne({
         'transaction.paymentId': paymentId,
       });
+      console.log('hit', requestExists, paymentId);
 
       if (!requestExists) {
         throw new AppError(
@@ -450,7 +464,10 @@ const verifyPaymentFromDB = async (paymentId: string) => {
       await session.endSession();
       throw new Error(err);
     }
+  } else {
+    throw new AppError(httpStatus.BAD_REQUEST, 'Payment failed');
   }
+  console.log('hit');
 
   return payment[0];
 };
