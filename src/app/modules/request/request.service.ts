@@ -359,14 +359,7 @@ const createPaymentIntoDB = async (requestId: string, client_ip: string) => {
 
 // verify payment from db (tenant)
 const verifyPaymentFromDB = async (paymentId: string) => {
-  console.log(paymentId);
   const payment = await verifyPaymentAsync(paymentId);
-
-  const findOne = await RequestModel.findOne({
-    'transaction.paymentId': paymentId,
-  });
-
-  console.log(findOne,payment);
 
   if (payment.length) {
     const updated = await RequestModel.findOneAndUpdate(
@@ -406,7 +399,6 @@ const verifyPaymentFromDB = async (paymentId: string) => {
       const requestExists = await RequestModel.findOne({
         'transaction.paymentId': paymentId,
       });
-      console.log('hit', requestExists, paymentId);
 
       if (!requestExists) {
         throw new AppError(
@@ -467,7 +459,6 @@ const verifyPaymentFromDB = async (paymentId: string) => {
   } else {
     throw new AppError(httpStatus.BAD_REQUEST, 'Payment failed');
   }
-  console.log('hit');
 
   return payment[0];
 };

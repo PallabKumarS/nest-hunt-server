@@ -15,11 +15,7 @@ router.get(
   ListingController.getPersonalListings,
 );
 
-router.get(
-  '/:listingId',
-  auth(USER_ROLE.landlord, USER_ROLE.tenant, USER_ROLE.admin),
-  ListingController.getSingleListing,
-);
+router.get('/:listingId', ListingController.getSingleListing);
 
 router.post('/', auth(USER_ROLE.landlord), ListingController.createListing);
 

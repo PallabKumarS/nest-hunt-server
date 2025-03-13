@@ -12,7 +12,6 @@ class QueryBuilder<T> {
   search(searchableFields: string[]) {
     const searchTerm = this?.query?.searchTerm;
 
-
     if (searchTerm) {
       this.modelQuery = this.modelQuery.find({
         $or: searchableFields.map((field) => {
@@ -45,10 +44,16 @@ class QueryBuilder<T> {
 
     if (typeof queryObj.houseLocation === 'string') {
       queryObj.houseLocation = {
-        $in: queryObj.houseLocation // change the location as needed as that is the field name in the database
+        $in: queryObj.houseLocation
           .split(',')
-          .map((location) => new RegExp(`^${location}$`, 'i')),
+          .map((location) => new RegExp(location.trim(), 'i')), // Partial match, no ^ or $
       };
+    }
+
+    if ('availability' in queryObj) {
+      queryObj.isAvailable =
+        queryObj.availability === 'true' || queryObj.availability === true;
+      delete queryObj.availability;
     }
 
     if ('minPrice' in queryObj || 'maxPrice' in queryObj) {
@@ -65,6 +70,8 @@ class QueryBuilder<T> {
       delete queryObj.minPrice;
       delete queryObj.maxPrice;
     }
+
+    console.log(queryObj);
 
     this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
 
