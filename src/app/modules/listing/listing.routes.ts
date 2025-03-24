@@ -9,13 +9,13 @@ router.get('/', ListingController.getAllListings);
 
 router.get('/locations', ListingController.getListingLocations);
 
+router.get('/:listingId', ListingController.getSingleListing);
+
 router.get(
   '/personal',
   auth(USER_ROLE.landlord),
   ListingController.getPersonalListings,
 );
-
-router.get('/:listingId', ListingController.getSingleListing);
 
 router.post('/', auth(USER_ROLE.landlord), ListingController.createListing);
 
